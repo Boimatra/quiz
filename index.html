@@ -11,9 +11,11 @@
 <style>
 :root{
   --ink:#0e2620; --muted:#587067; --line:#d3ded9; --page:#edf3f0; --card:#ffffff;
-  --green:#0a6b4e; --green-d:#07523c; --green-l:#dcefe7;
-  --red:#d93b2b; --red-l:#fbe6e3;
-  --r:14px;
+  --green:#0a6b4e; --green-d:#07523c; --green-l:#dcefe7; --green2:#12a274;
+  --red:#d93b2b; --red-l:#fbe6e3; --gold:#c8971f; --gold-l:#fdf3da;
+  --r:16px;
+  --shadow:0 1px 2px rgba(14,38,32,.04), 0 8px 24px -12px rgba(14,38,32,.18);
+  --shadow-lg:0 12px 32px -10px rgba(14,38,32,.28);
   --display:'Baloo Da 2','Hind Siliguri','Noto Sans Bengali',system-ui,sans-serif;
   --body:'Hind Siliguri','Noto Sans Bengali',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 }
@@ -23,42 +25,55 @@ body{margin:0;background:var(--page);color:var(--ink);font:400 17px/1.55 var(--b
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--green);outline-offset:2px}
-.wrap{max-width:680px;margin:0 auto;padding:16px 16px calc(28px + env(safe-area-inset-bottom))}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px calc(28px + env(safe-area-inset-bottom));position:relative}
 body.inquiz .wrap{padding-bottom:calc(104px + env(safe-area-inset-bottom))}
-.screen{display:none}.screen.on{display:block}
+.screen{display:none}.screen.on{display:block;animation:fadein .25s ease}
+@keyframes fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 [hidden]{display:none!important}
 
+/* hero backdrop */
+.hero{position:absolute;inset:-16px -16px auto -16px;height:220px;background:radial-gradient(1100px 220px at 15% -20%,#e4f5ec 0%,transparent 60%),linear-gradient(180deg,#e9f6f0 0%,var(--page) 100%);z-index:-1;border-radius:0 0 32px 32px}
+
 /* top bar */
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 0 18px}
-.brand{display:flex;align-items:center;gap:10px;font:800 22px/1 var(--display)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0 18px}
+.brand{display:flex;align-items:center;gap:10px;font:800 23px/1 var(--display);letter-spacing:-.01em}
 .dot{width:22px;height:22px;border-radius:50%;background:var(--red);box-shadow:0 0 0 5px var(--green-l);flex:none}
-.lang{display:flex;background:#fff;border:1px solid var(--line);border-radius:99px;padding:3px}
-.lang button{border:0;background:none;padding:4px 12px;border-radius:99px;font-size:14px;font-weight:600;color:var(--muted)}
+.lang{display:flex;background:#fff;border:1px solid var(--line);border-radius:99px;padding:3px;box-shadow:var(--shadow)}
+.lang button{border:0;background:none;padding:5px 13px;border-radius:99px;font-size:14px;font-weight:600;color:var(--muted);transition:background .15s,color .15s}
 .lang button.on{background:var(--green);color:#fff}
 
 h1{font:800 clamp(28px,7vw,40px)/1.1 var(--display);margin:6px 0 20px;letter-spacing:-.01em}
 h2{font:700 21px/1.35 var(--body);margin:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
 .muted{color:var(--muted)}
 label{display:block;font-weight:600;margin:16px 0 6px}
 label small{font-weight:400;color:var(--muted)}
-input[type=text],input[type=tel],input[type=password]{width:100%;height:52px;padding:0 14px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:18px}
+input[type=text],input[type=tel],input[type=password]{width:100%;height:52px;padding:0 14px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:18px;transition:border-color .15s,box-shadow .15s}
 input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px var(--green-l)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:12px;border:2px solid var(--green);background:var(--green);color:#fff;font-weight:700;font-size:18px}
-.btn:hover{background:var(--green-d);border-color:var(--green-d)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:12px;border:2px solid var(--green);background:linear-gradient(180deg,var(--green2),var(--green));color:#fff;font-weight:700;font-size:18px;transition:transform .1s,box-shadow .15s,background .15s;box-shadow:0 2px 0 rgba(0,0,0,.06)}
+.btn:hover{filter:brightness(1.04)}
+.btn:active{transform:translateY(1px)}
 .btn.ghost{background:#fff;color:var(--green)}
 .btn.ghost:hover{background:var(--green-l)}
 .btn.block{width:100%;margin-top:22px}
-.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none;transform:none}
 .link{border:0;background:none;color:var(--green);font-weight:600;text-decoration:underline;padding:6px 0}
 .err{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--red-l);color:#8e2016;font-weight:500}
 
+/* live badge */
+.live-badge{display:inline-flex;align-items:center;gap:6px;background:#fff0ef;color:var(--red);border:1px solid #f3c4bd;font:700 13px var(--body);padding:3px 10px 3px 8px;border-radius:99px;letter-spacing:.02em}
+.live-badge i{width:8px;height:8px;border-radius:50%;background:var(--red);animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.3)}}
+
 /* home */
 .qpick{display:grid;gap:10px;margin-bottom:4px}
-.qopt{display:block;width:100%;text-align:left;padding:14px 16px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.qopt{display:block;width:100%;text-align:left;padding:14px 16px;border:2px solid var(--line);border-radius:12px;background:#fff;transition:border-color .15s,background .15s}
+.qopt .qopt-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .qopt b{display:block;font-size:18px}
-.qopt span{color:var(--muted);font-size:15px}
+.qopt span.d{color:var(--muted);font-size:15px;display:block;margin-top:2px}
 .qopt.on{border-color:var(--green);background:var(--green-l)}
+.qone{margin-bottom:2px}
+.qone .qone-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .qone b{display:block;font:700 24px/1.2 var(--display)}
 .qone p{margin:6px 0 0;color:var(--muted)}
 .resume{border-color:var(--green);background:var(--green-l);margin-bottom:16px}
@@ -66,9 +81,26 @@ input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px var(--gr
 .resume .btn{min-height:46px;font-size:16px}
 .lbrow{margin-top:14px;text-align:center}
 
+/* home leaderboard widget */
+.homelb{margin-top:16px}
+.homelb .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.homelb .hd b{font:700 17px var(--display)}
+.lbitem{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.lbitem:last-child{border-bottom:0}
+.lbitem .rk{flex:none;width:26px;height:26px;border-radius:50%;background:var(--page);display:grid;place-items:center;font:700 13px var(--display)}
+.lbitem:nth-child(1) .rk{background:var(--gold-l);color:var(--gold)}
+.lbitem .nm{flex:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lbitem .sc{font:700 15px var(--display);color:var(--green-d)}
+.lbitem .mv{width:14px;text-align:center;font-size:12px}
+.mv.up{color:var(--green)}.mv.down{color:var(--red)}
+.lbitem.me{background:var(--gold-l);border-radius:10px;padding-left:8px;padding-right:8px}
+.lbitem.flash{animation:flash .9s ease}
+@keyframes flash{0%{background:var(--green-l)}100%{background:transparent}}
+.lbempty{color:var(--muted);text-align:center;padding:14px 0}
+
 /* quiz */
 .qhead{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:12px}
-.qtitle{font:700 19px/1.25 var(--display)}
+.qtitle{font:700 19px/1.25 var(--display);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .qsec{color:var(--muted);font-size:15px}
 .timer{position:relative;width:66px;height:66px;flex:none}
 .timer svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -84,7 +116,7 @@ input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px var(--gr
 .qcount{display:flex;justify-content:space-between;margin:8px 2px 14px;color:var(--muted);font-size:15px}
 .q h2{white-space:pre-line;margin-bottom:16px}
 .opts{display:grid;gap:10px}
-.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;min-height:56px}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;min-height:56px;transition:border-color .15s,background .15s}
 .opt:hover:not(:disabled){border-color:var(--green)}
 .opt .ltr{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--page);font-weight:700}
 .opt .txt{white-space:pre-line}
@@ -93,9 +125,22 @@ input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px var(--gr
 .opt:disabled{cursor:not-allowed;opacity:.65}
 .qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;color:var(--muted);font-size:15px;gap:10px;flex-wrap:wrap}
 .lockmsg{margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--red-l);color:#8e2016;font-weight:600}
-.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:5}
-.bar .in{max-width:680px;margin:0 auto;display:grid;grid-template-columns:1fr 1.2fr 1fr 1.1fr;gap:8px}
+.waitmsg{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--green-l);color:var(--green-d);font-weight:600;display:flex;align-items:center;gap:10px}
+.bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:5;box-shadow:0 -4px 16px rgba(0,0,0,.05)}
+.bar .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:1fr 1.2fr 1fr 1.1fr;gap:8px}
 .bar .btn{min-height:48px;padding:0 4px;font-size:15px;line-height:1.1}
+
+/* live in-quiz leaderboard panel */
+.livepanel{margin-top:16px}
+.livepanel .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.livepanel .hd b{font:700 15px var(--display)}
+.count-pill{margin-left:auto;font-size:13px;color:var(--muted);background:var(--page);padding:2px 10px;border-radius:99px}
+
+/* lobby */
+.lobby-wrap{text-align:center;padding:26px 12px}
+.lobby-wrap .spinner{width:46px;height:46px;border:4px solid var(--green-l);border-top-color:var(--green);border-radius:50%;margin:0 auto 18px;animation:sp 1s linear infinite}
+.lobby-wrap h2{margin-bottom:6px}
+.lobby-count{display:inline-flex;align-items:center;gap:8px;background:var(--green-l);color:var(--green-d);font-weight:700;padding:8px 16px;border-radius:99px;margin-top:14px}
 
 /* dialogs */
 dialog{border:0;border-radius:18px;padding:0;width:min(94vw,560px);max-height:88vh;color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.25)}
@@ -134,8 +179,8 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
 .review .body{padding:0 14px 14px;font-size:16px}
 .review .body p{margin:4px 0}
 
-/* leaderboard */
-.tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+/* leaderboard screen */
+.tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
 .tbl th,.tbl td{padding:12px 10px;text-align:left;border-bottom:1px solid var(--line)}
 .tbl th{background:var(--green-l);font-weight:600;font-size:15px}
 .tbl td.n,.tbl th.n{text-align:right}
@@ -144,15 +189,16 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
 
 /* misc */
 #busy{position:fixed;inset:0;background:rgba(237,243,240,.85);display:grid;place-items:center;z-index:20;font-weight:600}
-#busy div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 24px;display:flex;gap:12px;align-items:center}
+#busy div{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 24px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-lg)}
 .spin{width:22px;height:22px;border:3px solid var(--green-l);border-top-color:var(--green);border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
-#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-weight:600;z-index:30;max-width:90vw;text-align:center}
+#toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-weight:600;z-index:30;max-width:90vw;text-align:center;box-shadow:var(--shadow-lg)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
+  <div class="hero" aria-hidden="true"></div>
   <header class="top">
     <div class="brand"><span class="dot"></span><span id="siteName">Quiz</span></div>
     <div class="lang" role="group" aria-label="Language">
@@ -184,13 +230,28 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
       <button id="joinBtn" class="btn block" type="button" data-i18n="join"></button>
       <div class="lbrow" id="lbLinkRow" hidden><button class="link" id="lbLink" type="button" data-i18n="leaderboard"></button></div>
     </div>
+    <div class="card homelb" id="homeLbCard" hidden>
+      <div class="hd"><b data-i18n="leaderboard"></b><span class="count-pill" id="homeLbCount"></span></div>
+      <div id="homeLbBody"></div>
+    </div>
+  </section>
+
+  <!-- LOBBY (live quizzes only) -->
+  <section id="s-lobby" class="screen">
+    <div class="card lobby-wrap">
+      <div class="live-badge" style="margin-bottom:14px"><i></i><span data-i18n="liveTag"></span></div>
+      <div class="spinner" aria-hidden="true"></div>
+      <h2 id="lobbyQuizName"></h2>
+      <p class="muted" data-i18n="lobbyWait"></p>
+      <div class="lobby-count" id="lobbyCount"></div>
+    </div>
   </section>
 
   <!-- QUIZ -->
   <section id="s-quiz" class="screen">
     <div class="qhead">
       <div>
-        <div class="qtitle" id="qQuizName"></div>
+        <div class="qtitle"><span id="qQuizName"></span><span class="live-badge" id="qLiveBadge" hidden><i></i><span data-i18n="liveTag"></span></span></div>
         <div class="qsec" id="qSection"></div>
       </div>
       <div class="timer" id="timer" aria-live="off">
@@ -198,14 +259,19 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
         <span id="tText">0:00</span>
       </div>
     </div>
-    <div class="prog"><div id="progFill"></div></div>
+    <div class="prog" id="progBar"><div id="progFill"></div></div>
     <div class="qcount"><span id="qCount"></span><span id="qAnswered"></span></div>
     <article class="card q">
       <h2 id="qText"></h2>
       <div class="opts" id="opts"></div>
       <div id="lockMsg" class="lockmsg" hidden></div>
+      <div id="waitMsg" class="waitmsg" hidden><span class="spin" style="width:16px;height:16px;border-width:2px"></span><span id="waitMsgText"></span></div>
       <div class="qfoot"><button class="link" id="clearBtn" type="button" data-i18n="clear"></button><span id="marksInfo"></span></div>
     </article>
+    <div class="card livepanel" id="livePanel" hidden>
+      <div class="hd"><b data-i18n="liveLb"></b><span class="count-pill" id="liveParticipantCount"></span></div>
+      <div id="liveLbBody"></div>
+    </div>
   </section>
 
   <!-- RESULT -->
@@ -247,7 +313,7 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
   </section>
 </div>
 
-<!-- quiz bottom bar -->
+<!-- quiz bottom bar (self-paced only; hidden entirely in Live mode) -->
 <nav class="bar" id="quizBar" hidden>
   <div class="in">
     <button class="btn ghost" id="prevBtn" type="button" data-i18n="prev"></button>
@@ -281,10 +347,11 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
    SETTINGS: paste your Google Apps Script Web App URL between the quotes.
    It looks like  https://script.google.com/macros/s/AKfy.../exec
    =================================================================== */
-const API_URL = "https://script.google.com/macros/s/AKfycbwooDLpYroujYm5Xh5QwtjYxzrAxEGixVuBZEbOAMpUpdk36Ngv_-dD3cH1y8LjC4lBww/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxVpJYAOF34er60Da0bOvwzVz69150Ap5DPf0Vaoe-uXvSxCe6oE-fvt3N0cpHerp2y0A/exec";
 
 const LS_STATE = 'quiz_state_v1', LS_RESULT = 'quiz_result_v1', LS_LANG = 'quiz_lang', LS_NAME = 'quiz_name';
 const MAX_AGE_MS = 12 * 3600 * 1000;
+const LIVE_POLL_MS = 1800;
 const $ = id => document.getElementById(id);
 
 /* ------------------------------ translations ------------------------------ */
@@ -304,6 +371,8 @@ const I18N = {
     yourAnswer:'Your answer', correctAnswer:'Correct answer', none:'No answer', participant:'Participant', noResults:'No results yet.',
     lbInfo:'{n} participants finished. Highest score first; ties go to the faster finisher.',
     leaveWarn:'Your quiz is still running.', of:'of',
+    liveTag:'LIVE', lobbyWait:'Waiting for the host to start the quiz…', liveLb:'Live leaderboard',
+    waitHost:'Answer locked — waiting for the next question…', waitEnd:'Finishing up…',
     e_NETWORK:'Could not reach the server. Check your internet connection and try again.',
     e_NAME_REQUIRED:'Please enter your name', e_PIN_REQUIRED:'Please enter the Quiz PIN', e_PIN_INVALID:'Invalid Quiz PIN',
     e_QUIZ_NOT_FOUND:'Quiz not found', e_QUIZ_INACTIVE:'Quiz is inactive', e_LIMIT:'Participant limit reached',
@@ -311,7 +380,7 @@ const I18N = {
     e_MOBILE_DUP:'This mobile number has already joined this quiz.', e_NO_QUESTIONS:'This quiz has no questions yet.',
     e_BUSY:'The server is busy. Please try again in a moment.', e_AUTH:'Your session is not valid. Please join the quiz again.',
     e_SETUP:'This site is not connected to its quiz sheet yet.', e_LB_OFF:'The leaderboard is turned off.', e_SERVER:'Something went wrong on the server. Please try again.',
-    e_ALREADY_SUBMITTED:'You have already submitted this quiz.'
+    e_ALREADY_SUBMITTED:'You have already submitted this quiz.', e_QUIZ_ENDED:'This live quiz has already ended.', e_NOT_LIVE:'This quiz is not currently live.'
   },
   bn: {
     resumeTitle:'আপনার একটি কুইজ চলমান আছে', resume:'চালিয়ে যান', discard:'বাতিল করুন',
@@ -328,6 +397,8 @@ const I18N = {
     yourAnswer:'আপনার উত্তর', correctAnswer:'সঠিক উত্তর', none:'উত্তর নেই', participant:'অংশগ্রহণকারী', noResults:'এখনো কোনো ফলাফল নেই।',
     lbInfo:'{n} জন শেষ করেছেন। বেশি স্কোর আগে; স্কোর সমান হলে যিনি দ্রুত শেষ করেছেন তিনি এগিয়ে।',
     leaveWarn:'আপনার কুইজ এখনো চলছে।', of:'এর মধ্যে',
+    liveTag:'লাইভ', lobbyWait:'হোস্ট কুইজ শুরু করার জন্য অপেক্ষা করছে…', liveLb:'লাইভ লিডারবোর্ড',
+    waitHost:'উত্তর লক হয়েছে — পরের প্রশ্নের জন্য অপেক্ষা করুন…', waitEnd:'শেষ করা হচ্ছে…',
     e_NETWORK:'সার্ভারের সাথে সংযোগ হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।',
     e_NAME_REQUIRED:'অনুগ্রহ করে আপনার নাম লিখুন', e_PIN_REQUIRED:'অনুগ্রহ করে কুইজ পিন লিখুন', e_PIN_INVALID:'কুইজ পিন সঠিক নয়',
     e_QUIZ_NOT_FOUND:'কুইজ পাওয়া যায়নি', e_QUIZ_INACTIVE:'কুইজটি এখন চালু নেই', e_LIMIT:'অংশগ্রহণকারীর সীমা পূর্ণ হয়ে গেছে',
@@ -335,7 +406,7 @@ const I18N = {
     e_MOBILE_DUP:'এই মোবাইল নম্বর দিয়ে ইতিমধ্যে এই কুইজে যোগ দেওয়া হয়েছে।', e_NO_QUESTIONS:'এই কুইজে এখনো কোনো প্রশ্ন নেই।',
     e_BUSY:'সার্ভার ব্যস্ত আছে। একটু পরে আবার চেষ্টা করুন।', e_AUTH:'আপনার সেশন বৈধ নয়। আবার কুইজে যোগ দিন।',
     e_SETUP:'সাইটটি এখনো কুইজ শিটের সাথে যুক্ত হয়নি।', e_LB_OFF:'লিডারবোর্ড বন্ধ আছে।', e_SERVER:'সার্ভারে সমস্যা হয়েছে। আবার চেষ্টা করুন।',
-    e_ALREADY_SUBMITTED:'আপনি ইতিমধ্যে এই কুইজ জমা দিয়েছেন।'
+    e_ALREADY_SUBMITTED:'আপনি ইতিমধ্যে এই কুইজ জমা দিয়েছেন।', e_QUIZ_ENDED:'এই লাইভ কুইজ ইতিমধ্যে শেষ হয়ে গেছে।', e_NOT_LIVE:'এই কুইজ এখন লাইভ নেই।'
   }
 };
 let lang = localStorage.getItem(LS_LANG) || ((navigator.language || '').toLowerCase().startsWith('bn') ? 'bn' : 'en');
@@ -379,10 +450,34 @@ async function api(action, params = {}, method = 'GET') {
 function show(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + name));
   const inq = name === 'quiz';
-  $('quizBar').hidden = !inq;
-  document.body.classList.toggle('inquiz', inq);
+  $('quizBar').hidden = !inq || (S && S.mode === 'Live');
+  document.body.classList.toggle('inquiz', inq && !(S && S.mode === 'Live'));
   window.scrollTo(0, 0);
 }
+
+/* ------------------------------ leaderboard rendering (shared) ------------------------------ */
+// Renders a compact rank list and flags rank movement vs. the previous render
+// (prevRanks: {name -> rank}), which is how the "leaderboard rises and falls"
+// live effect is produced without any extra API surface.
+function renderLbList(container, items, meRank, prevRanks) {
+  container.textContent = '';
+  if (!items || !items.length) { container.appendChild(el('div', 'lbempty', t('noResults'))); return; }
+  items.forEach(it => {
+    const row = el('div', 'lbitem' + (it.Rank === meRank ? ' me' : ''));
+    row.appendChild(el('span', 'rk', String(it.Rank)));
+    row.appendChild(el('span', 'nm', it.Name));
+    if (prevRanks && prevRanks[it.Name] !== undefined && prevRanks[it.Name] !== it.Rank) {
+      const up = prevRanks[it.Name] > it.Rank;
+      row.appendChild(el('span', 'mv ' + (up ? 'up' : 'down'), up ? '▲' : '▼'));
+      row.classList.add('flash');
+    } else {
+      row.appendChild(el('span', 'mv', ''));
+    }
+    row.appendChild(el('span', 'sc', fmtNum(it.Score)));
+    container.appendChild(row);
+  });
+}
+function ranksByName(items) { const m = {}; (items || []).forEach(x => m[x.Name] = x.Rank); return m; }
 
 /* ------------------------------ language ------------------------------ */
 function applyLang() {
@@ -401,22 +496,30 @@ const home = { quizzes: [], selected: '', mobileRequired: false, showLb: true };
 let S = null;            // running quiz session
 let lastResult = null;
 let lbQuizId = '';
+let homeLbTimer = null, homeLbPrevRanks = null;
 
 function renderQuizBox() {
   const box = $('quizBox'); box.textContent = '';
   const qs = home.quizzes;
   if (!qs.length) { box.appendChild(el('p', 'muted', t('noQuiz'))); return; }
   if (qs.length === 1) {
-    const d = el('div', 'qone'); d.appendChild(el('b', '', qs[0].QuizName));
-    if (qs[0].Description) d.appendChild(el('p', '', qs[0].Description));
+    const q = qs[0];
+    const d = el('div', 'qone');
+    const top = el('div', 'qone-top'); top.appendChild(el('b', '', q.QuizName));
+    if (q.Mode === 'Live') { const b = el('span', 'live-badge'); b.appendChild(el('i')); b.appendChild(el('span', '', t('liveTag'))); top.appendChild(b); }
+    d.appendChild(top);
+    if (q.Description) d.appendChild(el('p', '', q.Description));
     box.appendChild(d);
   } else {
     box.appendChild(el('div', 'muted', t('pickQuiz')));
     const wrap = el('div', 'qpick');
     qs.forEach(q => {
       const b = el('button', 'qopt' + (q.QuizID === home.selected ? ' on' : '')); b.type = 'button';
-      b.appendChild(el('b', '', q.QuizName)); if (q.Description) b.appendChild(el('span', '', q.Description));
-      b.addEventListener('click', () => { home.selected = q.QuizID; renderQuizBox(); });
+      const top = el('div', 'qopt-top'); top.appendChild(el('b', '', q.QuizName));
+      if (q.Mode === 'Live') { const lb = el('span', 'live-badge'); lb.appendChild(el('i')); lb.appendChild(el('span', '', t('liveTag'))); top.appendChild(lb); }
+      b.appendChild(top);
+      if (q.Description) b.appendChild(el('span', 'd', q.Description));
+      b.addEventListener('click', () => { home.selected = q.QuizID; renderQuizBox(); refreshHomeLb(); });
       wrap.appendChild(b);
     });
     box.appendChild(wrap);
@@ -424,10 +527,41 @@ function renderQuizBox() {
   $('lbLinkRow').hidden = !(home.showLb && home.selected);
 }
 
+// A compact leaderboard preview on the home page itself, per the requirement
+// that the leaderboard be visible on the front page (live quizzes show live,
+// in-progress scores; self-paced quizzes show completed participants so far).
+function stopHomeLb() { if (homeLbTimer) { clearInterval(homeLbTimer); homeLbTimer = null; } }
+async function refreshHomeLb(first) {
+  stopHomeLb();
+  if (!home.selected || !home.showLb) { $('homeLbCard').hidden = true; return; }
+  const quiz = home.quizzes.find(q => q.QuizID === home.selected);
+  if (!quiz) { $('homeLbCard').hidden = true; return; }
+  if (first) homeLbPrevRanks = null;
+  const tick = async () => {
+    if ($('s-home').classList.contains('on') === false) return stopHomeLb();
+    try {
+      let items, count;
+      if (quiz.Mode === 'Live') {
+        const d = await api('liveState', { quizId: quiz.QuizID });
+        items = d.Leaderboard; count = d.ParticipantCount;
+      } else {
+        const d = await api('results', { quizId: quiz.QuizID });
+        items = d.Items.slice(0, 5); count = d.TotalCompleted;
+      }
+      $('homeLbCard').hidden = false;
+      $('homeLbCount').textContent = count;
+      renderLbList($('homeLbBody'), items, null, homeLbPrevRanks);
+      homeLbPrevRanks = ranksByName(items);
+    } catch (e) { /* leaderboard preview is best-effort; stay quiet on failure */ }
+  };
+  await tick();
+  homeLbTimer = setInterval(tick, quiz.Mode === 'Live' ? 3000 : 8000);
+}
+
 function loadSaved() { try { const s = JSON.parse(localStorage.getItem(LS_STATE)); if (s && !s.submitted && Date.now() - s.savedAt < MAX_AGE_MS && s.questions) return s; } catch (e) {} return null; }
 function renderResume() {
   const s = loadSaved(); const box = $('resumeBox');
-  box.hidden = !s || !!S;
+  box.hidden = !s || !!S || s.mode === 'Live';
   if (s) $('resumeInfo').textContent = s.quiz.QuizName + ' - ' + s.name;
 }
 
@@ -447,6 +581,11 @@ async function initHome() {
     home.selected = match ? match.QuizID : (home.quizzes.length === 1 ? home.quizzes[0].QuizID : '');
   } catch (e) { showHomeErr(errText(e)); }
   applyLang();
+  refreshHomeLb(true);
+  // A saved LIVE session skips the manual "resume" prompt: time is passing
+  // for everyone else in the room, so we rejoin the live state immediately.
+  const s = loadSaved();
+  if (s && s.mode === 'Live') { S = s; enterLiveFlow(); }
 }
 function showHomeErr(msg) { const x = $('homeErr'); x.textContent = msg; x.hidden = !msg; }
 
@@ -460,15 +599,16 @@ $('joinBtn').addEventListener('click', async () => {
   if (home.quizzes.length > 1 && !home.selected) return showHomeErr(t('pickQuiz'));
   busy(true, 'joining'); $('joinBtn').disabled = true;
   try {
+    // join now returns the full sanitized question set in one call (faster).
     const j = await api('join', { quizId: home.selected, pin, name, mobile }, 'POST');
-    busy(true, 'starting');
-    const d = await api('questions', { quizId: j.Quiz.QuizID, participantId: j.ParticipantID, token: j.Token });
     localStorage.setItem(LS_NAME, name);
     localStorage.removeItem(LS_RESULT);
-    S = { quiz: d.Quiz, sections: d.Sections, questions: d.Questions, pid: j.ParticipantID, token: j.Token, name,
+    S = { quiz: j.Quiz, mode: j.Quiz.Mode || 'Standard', sections: j.Sections, questions: j.Questions, pid: j.ParticipantID, token: j.Token, name,
           answers: {}, timeLeft: {}, idx: 0, running: true, savedAt: Date.now(), submitted: false };
-    d.Questions.forEach(q => S.timeLeft[q.QuestionID] = q.TimeLimit);
-    saveState(); startQuiz();
+    j.Questions.forEach(q => S.timeLeft[q.QuestionID] = q.TimeLimit);
+    saveState();
+    stopHomeLb();
+    if (S.mode === 'Live') enterLiveFlow(); else startQuiz();
   } catch (e) { showHomeErr(errText(e)); }
   finally { busy(false); $('joinBtn').disabled = false; }
 });
@@ -484,7 +624,7 @@ $('resumeBtn').addEventListener('click', () => {
 });
 $('discardBtn').addEventListener('click', () => { localStorage.removeItem(LS_STATE); renderResume(); });
 
-/* ------------------------------ QUIZ ------------------------------ */
+/* ------------------------------ SELF-PACED QUIZ ------------------------------ */
 const cur = () => S.questions[S.idx];
 const isLocked = q => S.timeLeft[q.QuestionID] <= 0;
 let tickHandle = null, endAt = 0, lastSave = 0, timerQid = null, advancing = false;
@@ -498,6 +638,9 @@ function saveState() {
 function startQuiz() {
   advancing = false;
   show('quiz');
+  $('livePanel').hidden = true;
+  $('qLiveBadge').hidden = true;
+  $('progBar').hidden = false;
   renderQuestion();
 }
 
@@ -568,6 +711,7 @@ function renderQuestion(keepTimer) {
     box.appendChild(b);
   });
   $('lockMsg').hidden = !locked; $('lockMsg').textContent = t('timeUp');
+  $('waitMsg').hidden = true;
   $('clearBtn').hidden = locked || !S.answers[q.QuestionID];
   const negative = (S.quiz.NegativeMarks || 0);
   $('marksInfo').textContent = t('marksInfo', { m: fmtNum(q.Marks), n: fmtNum(negative) });
@@ -580,6 +724,7 @@ function choose(L) {
   const q = cur(); if (isLocked(q)) return;
   S.answers[q.QuestionID] = L;
   saveState(); renderQuestion(true);
+  if (S.mode === 'Live') api('submitAnswer', { quizId: S.quiz.QuizID, participantId: S.pid, token: S.token, questionId: q.QuestionID, selectedAnswer: L }, 'POST').catch(() => {});
 }
 $('clearBtn').addEventListener('click', () => { const q = cur(); if (isLocked(q)) return; delete S.answers[q.QuestionID]; saveState(); renderQuestion(true); });
 
@@ -608,7 +753,7 @@ function openPalette() {
 }
 $('palBtn').addEventListener('click', openPalette);
 $('palClose').addEventListener('click', () => $('palDlg').close());
-$('palDlg').addEventListener('close', () => { if (S && $('s-quiz').classList.contains('on') && !$('confirmDlg').open) startTimer(); });
+$('palDlg').addEventListener('close', () => { if (S && S.mode !== 'Live' && $('s-quiz').classList.contains('on') && !$('confirmDlg').open) startTimer(); });
 
 /* submit */
 function openConfirm(timeUpOnLast) {
@@ -619,7 +764,7 @@ function openConfirm(timeUpOnLast) {
 }
 $('submitBtn').addEventListener('click', () => openConfirm(false));
 $('confirmNo').addEventListener('click', () => $('confirmDlg').close());
-$('confirmDlg').addEventListener('close', () => { if (S && $('s-quiz').classList.contains('on') && !busyNow) startTimer(); });
+$('confirmDlg').addEventListener('close', () => { if (S && S.mode !== 'Live' && $('s-quiz').classList.contains('on') && !busyNow) startTimer(); });
 let busyNow = false;
 $('confirmYes').addEventListener('click', async () => {
   busyNow = true; $('confirmDlg').close(); freezeTimer(); saveState(); busy(true, 'submitting');
@@ -641,13 +786,123 @@ window.addEventListener('beforeunload', e => { if (S && $('s-quiz').classList.co
 document.addEventListener('visibilitychange', () => { if (document.hidden && S) saveState(); });
 
 document.addEventListener('keydown', e => {
-  if (!S || !$('s-quiz').classList.contains('on') || document.querySelector('dialog[open]') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if (!S || S.mode === 'Live' || !$('s-quiz').classList.contains('on') || document.querySelector('dialog[open]') || e.ctrlKey || e.metaKey || e.altKey) return;
   const k = e.key.toLowerCase();
   if (k.length === 1 && 'abcd'.includes(k)) choose(k.toUpperCase());
   else if (k.length === 1 && '1234'.includes(k)) choose('ABCD'[+k - 1]);
   else if (k === 'arrowright') go(S.idx + 1);
   else if (k === 'arrowleft') go(S.idx - 1);
 });
+
+/* ------------------------------ LIVE QUIZ ------------------------------ */
+// Host-paced flow: the admin's Live Control screen drives S.idx for every
+// participant at once. We poll apiLiveState (one call = sync + countdown +
+// leaderboard) every LIVE_POLL_MS, and run a light 250ms local ticker between
+// polls purely so the on-screen clock counts down smoothly.
+let livePollHandle = null, liveTickHandle = null, liveState = { status: 'Lobby', index: -1, timeLeft: 0, timeLimit: 0 };
+let livePrevRanks = null, liveLocked = false;
+
+function stopLivePoll() { if (livePollHandle) { clearInterval(livePollHandle); livePollHandle = null; } stopLiveTick(); }
+function stopLiveTick() { if (liveTickHandle) { clearInterval(liveTickHandle); liveTickHandle = null; } }
+
+function enterLiveFlow() {
+  livePrevRanks = null;
+  pollLiveOnce();
+  livePollHandle = setInterval(pollLiveOnce, LIVE_POLL_MS);
+}
+
+async function pollLiveOnce() {
+  if (!S) return stopLivePoll();
+  let d;
+  try { d = await api('liveState', { quizId: S.quiz.QuizID, participantId: S.pid }); }
+  catch (e) { return; /* transient network hiccup — next poll will retry */ }
+  liveState = { status: d.Status, index: d.Index, timeLeft: d.TimeLeft, timeLimit: d.TimeLimit };
+
+  if (d.Status === 'Lobby') {
+    show('lobby');
+    $('lobbyQuizName').textContent = S.quiz.QuizName;
+    $('lobbyCount').textContent = d.ParticipantCount + ' ' + t('participant').toLowerCase() + (lang === 'bn' ? ' যোগ দিয়েছেন' : (d.ParticipantCount === 1 ? ' joined' : 's joined'));
+    return;
+  }
+
+  if (d.Status === 'Ended') {
+    stopLivePoll();
+    busy(true, 'starting');
+    try {
+      const r = await api('submitQuiz', { quizId: S.quiz.QuizID, participantId: S.pid, token: S.token, answers: [] }, 'POST');
+      localStorage.removeItem(LS_STATE);
+      r._savedAt = Date.now();
+      localStorage.setItem(LS_RESULT, JSON.stringify(r));
+      S = null; busy(false);
+      showResult(r);
+    } catch (e) { busy(false); toast(errText(e)); }
+    return;
+  }
+
+  // Status === 'Live'
+  const isNewQuestion = !($('s-quiz').classList.contains('on')) || S.idx !== d.Index;
+  S.idx = d.Index;
+  if (isNewQuestion) {
+    liveLocked = false;
+    show('quiz');
+    $('quizBar').hidden = true; document.body.classList.remove('inquiz');
+    $('progBar').hidden = true; $('qAnswered').textContent = '';
+    $('qLiveBadge').hidden = false;
+    $('livePanel').hidden = false;
+    renderLiveQuestion();
+    startLiveTick(d.TimeLeft, d.TimeLimit);
+  } else {
+    // same question, just resync the authoritative countdown
+    S.timeLeft[cur().QuestionID] = d.TimeLeft;
+    if (d.TimeLeft <= 0 && !liveLocked) lockLiveQuestion();
+  }
+  $('liveParticipantCount').textContent = d.ParticipantCount;
+  renderLbList($('liveLbBody'), d.Leaderboard, d.Me ? d.Me.Rank : null, livePrevRanks);
+  livePrevRanks = ranksByName(d.Leaderboard);
+  saveState();
+}
+
+function startLiveTick(timeLeft, timeLimit) {
+  stopLiveTick();
+  const qid = cur().QuestionID;
+  S.timeLeft[qid] = timeLeft;
+  paintTimer(timeLeft, timeLimit);
+  liveTickHandle = setInterval(() => {
+    if (!S || S.mode !== 'Live') return stopLiveTick();
+    const remain = Math.max(0, S.timeLeft[qid] - 0.25);
+    S.timeLeft[qid] = remain;
+    paintTimer(remain, timeLimit);
+    if (remain <= 0 && !liveLocked) lockLiveQuestion();
+  }, 250);
+}
+
+function lockLiveQuestion() {
+  liveLocked = true;
+  document.querySelectorAll('#opts .opt').forEach(b => b.disabled = true);
+  $('waitMsg').hidden = false;
+  $('waitMsgText').textContent = t('waitHost');
+}
+
+function renderLiveQuestion() {
+  const q = cur(), n = S.questions.length;
+  $('qQuizName').textContent = S.quiz.QuizName;
+  $('qSection').textContent = t('section') + ': ' + q.SectionName;
+  $('qCount').textContent = t('question') + ' ' + (S.idx + 1) + ' / ' + n;
+  $('qText').textContent = q.Question;
+  const box = $('opts'); box.textContent = '';
+  ['A', 'B', 'C', 'D'].forEach(L => {
+    const text = q['Option' + L]; if (text === '' || text == null) return;
+    const b = el('button', 'opt' + (S.answers[q.QuestionID] === L ? ' sel' : '')); b.type = 'button';
+    b.dataset.l = L; b.appendChild(el('span', 'ltr', L)); b.appendChild(el('span', 'txt', text));
+    b.addEventListener('click', () => choose(L));
+    box.appendChild(b);
+  });
+  $('lockMsg').hidden = true;
+  $('waitMsg').hidden = true;
+  $('clearBtn').hidden = true;
+  const negative = (S.quiz.NegativeMarks || 0);
+  $('marksInfo').textContent = t('marksInfo', { m: fmtNum(q.Marks), n: fmtNum(negative) });
+}
 
 /* ------------------------------ RESULT ------------------------------ */
 function showResult(r) { lastResult = r; lbQuizId = r.QuizID; show('result'); renderResult(r); }
@@ -679,7 +934,7 @@ function renderResult(r) {
 $('rLb').addEventListener('click', () => openLeaderboard(lastResult.QuizID));
 $('rHome').addEventListener('click', () => { localStorage.removeItem(LS_RESULT); lastResult = null; S = null; initHome(); });
 
-/* ------------------------------ LEADERBOARD ------------------------------ */
+/* ------------------------------ LEADERBOARD (final results screen) ------------------------------ */
 async function openLeaderboard(quizId) {
   if (!quizId) return;
   lbQuizId = quizId; show('lb'); busy(true);
