@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Quiz Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+Da+2:wght@700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0e2620;--muted:#587067;--line:#d3ded9;--page:#edf3f0;--card:#fff;--green:#0a6b4e;--green-d:#07523c;--green-l:#dcefe7;--red:#d93b2b;--red-l:#fbe6e3;
+--display:'Baloo Da 2','Hind Siliguri',system-ui,sans-serif;--body:'Hind Siliguri','Noto Sans Bengali',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.5 var(--body)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
+[hidden]{display:none!important}
+.brand{display:flex;align-items:center;gap:10px;font:800 20px/1 var(--display)}
+.dot{width:20px;height:20px;border-radius:50%;background:var(--red);box-shadow:0 0 0 5px var(--green-l)}
+.head{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.nav{display:flex;gap:6px;overflow-x:auto;padding:10px 16px;background:#fff;border-bottom:1px solid var(--line)}
+.nav button{border:0;background:none;padding:8px 14px;border-radius:99px;font-weight:600;color:var(--muted);white-space:nowrap;cursor:pointer}
+.nav button.on{background:var(--green);color:#fff}
+main{max-width:1100px;margin:0 auto;padding:18px 16px 60px}
+h1{font:800 26px/1.2 var(--display);margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.muted{color:var(--muted)}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border-radius:10px;border:2px solid var(--green);background:var(--green);color:#fff;font-weight:600;cursor:pointer}
+.btn:hover{background:var(--green-d);border-color:var(--green-d)}
+.btn.ghost{background:#fff;color:var(--green)}.btn.ghost:hover{background:var(--green-l)}
+.btn.danger{background:#fff;color:var(--red);border-color:var(--red)}
+.btn.sm{min-height:32px;padding:0 10px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.bar .grow{flex:1}
+input,select,textarea{border:2px solid var(--line);border-radius:10px;background:#fff;padding:8px 12px;min-height:40px;width:100%}
+textarea{min-height:80px;resize:vertical}
+.bar input,.bar select{width:auto;min-width:150px}
+input:focus,select:focus,textarea:focus{border-color:var(--green);outline:none}
+label{display:block;font-weight:600;margin:12px 0 4px}
+label small{font-weight:400;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px}
+.stat b{display:block;font:800 30px/1.1 var(--display);color:var(--green)}
+.tw{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:14px}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--green-l);font-size:14px;white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.act{white-space:nowrap;text-align:right}td.act .btn{margin-left:4px}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:600}
+.tag.on{background:var(--green-l);color:var(--green-d)}.tag.off{background:var(--red-l);color:#8e2016}
+.trunc{max-width:420px;white-space:pre-line;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.pager{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px}
+.err{margin-top:12px;padding:10px 14px;border-radius:10px;background:var(--red-l);color:#8e2016;font-weight:500}
+.note{background:#fff8dc;border:1px solid #ecd98a;border-radius:12px;padding:10px 14px;margin-bottom:14px;font-size:15px}
+dialog{border:0;border-radius:16px;padding:0;width:min(94vw,640px);max-height:92vh;box-shadow:0 20px 60px rgba(0,0,0,.28)}
+dialog::backdrop{background:rgba(14,38,32,.55)}
+.dlg{padding:20px}.dlg h2{margin:0 0 4px;font:800 22px var(--display)}
+.dlg .body{max-height:62vh;overflow:auto;padding:0 2px 6px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+@media(max-width:560px){.cols{grid-template-columns:1fr}}
+.dlg .row{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+#login{max-width:400px;margin:12vh auto;padding:0 16px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-weight:600;z-index:50}
+</style>
+</head>
+<body>
+
+<div id="login" hidden>
+  <div class="card">
+    <div class="brand"><span class="dot"></span>Quiz Admin</div>
+    <label for="pw">Admin password</label>
+    <input id="pw" type="password" autocomplete="current-password">
+    <div id="loginErr" class="err" hidden></div>
+    <p><button id="loginBtn" class="btn" style="width:100%" type="button">Log in</button></p>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <div class="head"><div class="brand"><span class="dot"></span>Quiz Admin</div><button class="btn ghost sm" id="logout" type="button">Log out</button></div>
+  <nav class="nav" id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<dialog id="formDlg"><div class="dlg">
+  <h2 id="formTitle"></h2>
+  <div class="body" id="formBody"></div>
+  <div id="formErr" class="err" hidden></div>
+  <div class="row"><button class="btn ghost" id="formCancel" type="button">Cancel</button><button class="btn" id="formSave" type="button">Save</button></div>
+</div></dialog>
+<div id="toast" hidden></div>
+
+<script>
+/* Paste your Google Apps Script Web App URL between the quotes (same URL as in index.html). */
+const API_URL = "https://script.google.com/macros/s/AKfycbwooDLpYroujYm5Xh5QwtjYxzrAxEGixVuBZEbOAMpUpdk36Ngv_-dD3cH1y8LjC4lBww/exec";
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+let token = sessionStorage.getItem('adm_token') || '';
+const ctx = { quizId: '', quizzes: [], sections: [] };
+let view = 'dashboard', cache = {}, qState = { sectionId: '', search: '', status: '', page: 1 };
+
+function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2400); }
+
+async function call(action, payload = {}) {
+  if (!API_URL || API_URL.indexOf('PASTE_') === 0) throw Object.assign(new Error('API_URL is not set in admin.html'), { code: 'SETUP' });
+  let res;
+  try {
+    res = await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({ action, token }, payload)) });
+  } catch (e) { throw Object.assign(new Error('Could not reach the server. Check your internet connection.'), { code: 'NETWORK' }); }
+  const json = await res.json();
+  if (!json.ok) {
+    if (json.code === 'AUTH' && action !== 'adminLogin') { logout(); }
+    throw Object.assign(new Error(json.error), { code: json.code });
+  }
+  return json.data;
+}
+
+/* ------------------------------ login ------------------------------ */
+function logout() { token = ''; sessionStorage.removeItem('adm_token'); $('#app').hidden = true; $('#login').hidden = false; }
+async function doLogin() {
+  const err = $('#loginErr'); err.hidden = true; $('#loginBtn').disabled = true;
+  try {
+    const d = await call('adminLogin', { password: $('#pw').value });
+    token = d.Token; sessionStorage.setItem('adm_token', token); $('#pw').value = '';
+    await start();
+  } catch (e) { err.textContent = e.message; err.hidden = false; }
+  $('#loginBtn').disabled = false;
+}
+$('#loginBtn').addEventListener('click', doLogin);
+$('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+$('#logout').addEventListener('click', logout);
+
+const TABS = [['dashboard', 'Dashboard'], ['quizzes', 'Quizzes'], ['sections', 'Sections'], ['questions', 'Questions'], ['participants', 'Participants'], ['results', 'Results'], ['settings', 'Settings']];
+async function start() {
+  $('#login').hidden = true; $('#app').hidden = false;
+  $('#nav').innerHTML = TABS.map(t => `<button type="button" data-v="${t[0]}">${t[1]}</button>`).join('');
+  $('#nav').onclick = e => { const b = e.target.closest('button'); if (b) go(b.dataset.v); };
+  try { await loadQuizzes(); } catch (e) {}
+  go('dashboard');
+}
+async function loadQuizzes() {
+  const d = await call('adminList', { entity: 'quizzes' });
+  ctx.quizzes = d.Items;
+  if (!ctx.quizzes.some(q => q.QuizID === ctx.quizId)) ctx.quizId = ctx.quizzes.length ? ctx.quizzes[0].QuizID : '';
+}
+async function loadSections() {
+  ctx.sections = ctx.quizId ? (await call('adminList', { entity: 'sections', quizId: ctx.quizId })).Items : [];
+}
+async function go(v) {
+  view = v;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  $('#main').innerHTML = '<p class="muted">Loading…</p>';
+  try { await VIEWS[v](); } catch (e) { $('#main').innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+}
+
+/* ------------------------------ shared UI ------------------------------ */
+function quizPicker() {
+  if (!ctx.quizzes.length) return '<span class="muted">No quizzes yet. Create one first.</span>';
+  return `<select id="quizSel" aria-label="Quiz">${ctx.quizzes.map(q => `<option value="${esc(q.QuizID)}" ${q.QuizID === ctx.quizId ? 'selected' : ''}>${esc(q.QuizName)} (${esc(q.QuizID)})</option>`).join('')}</select>`;
+}
+function bindQuizPicker() { const s = $('#quizSel'); if (s) s.onchange = () => { ctx.quizId = s.value; qState.sectionId = ''; qState.page = 1; go(view); }; }
+const tag = st => { const on = String(st).toLowerCase() === 'active' || (st === '' && view === 'questions'); return `<span class="tag ${on ? 'on' : 'off'}">${on ? 'Active' : esc(st || 'Inactive')}</span>`; };
+const fmtDate = v => v ? new Date(v).toLocaleString() : '';
+const fmtDur = s => { s = Math.round(+s || 0); return Math.floor(s / 60) + 'm ' + (s % 60) + 's'; };
+const fmtNum = n => String(Math.round(Number(n) * 100) / 100);
+
+function field(f, val) {
+  const v = val == null ? '' : val;
+  let inp;
+  if (f.type === 'textarea') inp = `<textarea name="${f.name}">${esc(v)}</textarea>`;
+  else if (f.type === 'select') inp = `<select name="${f.name}">${f.options.map(o => `<option value="${esc(o.v)}" ${String(o.v) === String(v) ? 'selected' : ''}>${esc(o.l)}</option>`).join('')}</select>`;
+  else inp = `<input name="${f.name}" type="${f.type === 'number' ? 'number' : 'text'}" ${f.type === 'number' ? 'step="any" min="0"' : ''} value="${esc(v)}">`;
+  return `<div style="${f.half ? '' : ''}"><label>${esc(f.label)}${f.hint ? ` <small>${esc(f.hint)}</small>` : ''}</label>${inp}</div>`;
+}
+function openForm({ title, fields, values, onSave }) {
+  $('#formTitle').textContent = title;
+  $('#formBody').innerHTML = `<div class="cols">${fields.map(f => field(f, values[f.name])).join('')}</div>`;
+  $('#formErr').hidden = true;
+  $('#formSave').onclick = async () => {
+    const data = {};
+    fields.forEach(f => { data[f.name] = $('#formBody').querySelector(`[name="${f.name}"]`).value; });
+    $('#formSave').disabled = true;
+    try { await onSave(data); $('#formDlg').close(); }
+    catch (e) { $('#formErr').textContent = e.message; $('#formErr').hidden = false; }
+    $('#formSave').disabled = false;
+  };
+  $('#formDlg').showModal();
+}
+$('#formCancel').addEventListener('click', () => $('#formDlg').close());
+const STATUS_OPTS = [{ v: 'Active', l: 'Active' }, { v: 'Inactive', l: 'Inactive' }];
+
+function table(cols, rows) {
+  if (!rows.length) return '<div class="card muted">Nothing here yet.</div>';
+  return `<div class="tw"><table><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
+}
+function downloadCSV(name, header, rows) {
+  const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+  const csv = '\ufeff' + [header].concat(rows).map(r => r.map(q).join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.download = name; a.click();
+}
+
+/* ------------------------------ views ------------------------------ */
+const VIEWS = {};
+
+VIEWS.dashboard = async () => {
+  const d = await call('adminDashboard');
+  const items = [['Total quizzes', d.TotalQuizzes], ['Active quizzes', d.ActiveQuizzes], ['Total questions', d.TotalQuestions], ['Total participants', d.TotalParticipants], ['Completed', d.CompletedParticipants], ['Average score', fmtNum(d.AverageScore) + '  (' + fmtNum(d.AveragePercentage) + '%)']];
+  $('#main').innerHTML = `<h1>Dashboard</h1><div class="grid">${items.map(i => `<div class="stat"><b>${esc(i[1])}</b>${esc(i[0])}</div>`).join('')}</div>
+   <div class="note">Tip: you can also edit every quiz, section and question directly in the Google Sheet. Changes show up on the website immediately.</div>`;
+};
+
+VIEWS.quizzes = async () => {
+  await loadQuizzes();
+  cache.quizzes = {}; ctx.quizzes.forEach(q => cache.quizzes[q.QuizID] = q);
+  const rows = ctx.quizzes.map(q => `<tr>
+    <td>${esc(q.QuizID)}</td><td><b>${esc(q.QuizName)}</b><div class="muted">${esc(q.Description)}</div></td>
+    <td>${esc(q.PIN)}</td><td>${tag(q.Status)}</td>
+    <td>${q.ParticipantCount}${q.MaxParticipants ? ' / ' + esc(q.MaxParticipants) : ''}</td><td>${q.QuestionCount}</td>
+    <td class="act"><button class="btn sm ghost" data-a="edit" data-id="${esc(q.QuizID)}">Edit</button>
+      <button class="btn sm ghost" data-a="toggle" data-id="${esc(q.QuizID)}">${String(q.Status).toLowerCase() === 'active' ? 'Deactivate' : 'Activate'}</button>
+      <button class="btn sm ghost" data-a="link" data-id="${esc(q.QuizID)}">Copy link</button></td></tr>`);
+  $('#main').innerHTML = `<h1>Quizzes</h1><div class="bar"><button class="btn" id="add" type="button">New quiz</button></div>
+    ${table(['ID', 'Quiz', 'PIN', 'Status', 'Participants', 'Questions', ''], rows)}`;
+  $('#add').onclick = () => quizForm({ Status: 'Active' });
+  $('#main').onclick = async e => {
+    const b = e.target.closest('[data-a]'); if (!b) return; const q = cache.quizzes[b.dataset.id];
+    if (b.dataset.a === 'edit') quizForm(q);
+    if (b.dataset.a === 'toggle') { await call('saveQuiz', { quiz: { QuizID: q.QuizID, Status: String(q.Status).toLowerCase() === 'active' ? 'Inactive' : 'Active' } }).catch(x => toast(x.message)); go('quizzes'); }
+    if (b.dataset.a === 'link') { const u = new URL('./', location.href).href + '?quiz=' + encodeURIComponent(q.QuizID); try { await navigator.clipboard.writeText(u); toast('Link copied'); } catch (x) { prompt('Copy this link', u); } }
+  };
+};
+function quizForm(v) {
+  openForm({
+    title: v.QuizID ? 'Edit quiz ' + v.QuizID : 'New quiz',
+    values: v,
+    fields: [
+      { name: 'QuizName', label: 'Quiz name' }, { name: 'PIN', label: 'Quiz PIN' },
+      { name: 'Description', label: 'Description', type: 'textarea' }, { name: 'Status', label: 'Status', type: 'select', options: STATUS_OPTS },
+      { name: 'MaxParticipants', label: 'Maximum participants', type: 'number', hint: '(blank = unlimited)' },
+      { name: 'QuestionTime', label: 'Default question time (seconds)', type: 'number' },
+      { name: 'Marks', label: 'Default marks', type: 'number' }, { name: 'NegativeMarks', label: 'Default negative marks', type: 'number' }
+    ],
+    onSave: async data => { if (v.QuizID) data.QuizID = v.QuizID; await call('saveQuiz', { quiz: data }); toast('Quiz saved'); go('quizzes'); }
+  });
+}
+
+VIEWS.sections = async () => {
+  if (!ctx.quizzes.length) await loadQuizzes();
+  await loadSections();
+  cache.sections = {}; ctx.sections.forEach(s => cache.sections[s.SectionID] = s);
+  const rows = ctx.sections.map(s => `<tr><td>${esc(s.SectionOrder)}</td><td>${esc(s.SectionID)}</td><td><b>${esc(s.SectionName)}</b></td>
+    <td>${esc(s.QuestionLimit || 'All')}</td><td>${s.QuestionCount}</td><td>${tag(s.Status)}</td>
+    <td class="act"><button class="btn sm ghost" data-a="edit" data-id="${esc(s.SectionID)}">Edit</button>
+    <button class="btn sm ghost" data-a="toggle" data-id="${esc(s.SectionID)}">${String(s.Status).toLowerCase() === 'inactive' ? 'Activate' : 'Deactivate'}</button></td></tr>`);
+  $('#main').innerHTML = `<h1>Sections</h1><div class="bar">${quizPicker()}<button class="btn" id="add" type="button" ${ctx.quizId ? '' : 'disabled'}>New section</button></div>
+    ${table(['Order', 'ID', 'Section', 'Question limit', 'Active questions', 'Status', ''], rows)}`;
+  bindQuizPicker();
+  $('#add').onclick = () => sectionForm({ QuizID: ctx.quizId, Status: 'Active', SectionOrder: ctx.sections.length + 1 });
+  $('#main').onclick = async e => {
+    const b = e.target.closest('[data-a]'); if (!b) return; const s = cache.sections[b.dataset.id];
+    if (b.dataset.a === 'edit') sectionForm(s);
+    if (b.dataset.a === 'toggle') { await call('saveSection', { section: { SectionID: s.SectionID, Status: String(s.Status).toLowerCase() === 'inactive' ? 'Active' : 'Inactive' } }).catch(x => toast(x.message)); go('sections'); }
+  };
+};
+function sectionForm(v) {
+  openForm({
+    title: v.SectionID ? 'Edit section ' + v.SectionID : 'New section', values: v,
+    fields: [
+      { name: 'SectionName', label: 'Section name' }, { name: 'SectionOrder', label: 'Order', type: 'number' },
+      { name: 'QuestionLimit', label: 'Question limit', type: 'number', hint: '(blank = use all active questions)' },
+      { name: 'Status', label: 'Status', type: 'select', options: STATUS_OPTS }
+    ],
+    onSave: async data => { if (v.SectionID) data.SectionID = v.SectionID; else data.QuizID = v.QuizID; await call('saveSection', { section: data }); toast('Section saved'); go('sections'); }
+  });
+}
+
+VIEWS.questions = async () => {
+  if (!ctx.quizzes.length) await loadQuizzes();
+  await loadSections();
+  const d = ctx.quizId ? await call('adminList', { entity: 'questions', quizId: ctx.quizId, sectionId: qState.sectionId, search: qState.search, status: qState.status, page: qState.page, pageSize: 50 }) : { Items: [], Total: 0, Page: 1, PageSize: 50 };
+  cache.questions = {}; d.Items.forEach(q => cache.questions[q.QuestionID] = q);
+  const secName = id => (ctx.sections.find(s => s.SectionID === id) || {}).SectionName || id || '';
+  const rows = d.Items.map(q => `<tr><td>${esc(q.QuestionID)}</td><td><div class="trunc">${esc(q.Question)}</div></td><td>${esc(secName(q.SectionID))}</td>
+    <td><b>${esc(q.CorrectAnswer)}</b></td><td>${esc(q.TimeLimit)}</td><td>${esc(q.Marks)}${q.NegativeMarks !== '' ? ' / -' + esc(q.NegativeMarks) : ''}</td><td>${tag(q.Status)}</td>
+    <td class="act"><button class="btn sm ghost" data-a="edit" data-id="${esc(q.QuestionID)}">Edit</button>
+    <button class="btn sm ghost" data-a="toggle" data-id="${esc(q.QuestionID)}">${String(q.Status).toLowerCase() === 'inactive' ? 'Activate' : 'Deactivate'}</button></td></tr>`);
+  const pages = Math.max(1, Math.ceil(d.Total / d.PageSize));
+  $('#main').innerHTML = `<h1>Questions</h1>
+    <div class="bar">${quizPicker()}
+      <select id="fSec"><option value="">All sections</option>${ctx.sections.map(s => `<option value="${esc(s.SectionID)}" ${s.SectionID === qState.sectionId ? 'selected' : ''}>${esc(s.SectionName)}</option>`).join('')}</select>
+      <select id="fStatus"><option value="">Any status</option><option value="active" ${qState.status === 'active' ? 'selected' : ''}>Active</option><option value="inactive" ${qState.status === 'inactive' ? 'selected' : ''}>Inactive</option></select>
+      <input id="fSearch" placeholder="Search questions" value="${esc(qState.search)}">
+      <span class="grow"></span><button class="btn" id="add" type="button" ${ctx.quizId ? '' : 'disabled'}>Add question</button></div>
+    ${table(['ID', 'Question', 'Section', 'Answer', 'Time', 'Marks / neg.', 'Status', ''], rows)}
+    <div class="pager"><span class="muted">${d.Total} questions</span><button class="btn sm ghost" id="pPrev" ${d.Page <= 1 ? 'disabled' : ''}>Previous</button><span>Page ${d.Page} / ${pages}</span><button class="btn sm ghost" id="pNext" ${d.Page >= pages ? 'disabled' : ''}>Next</button></div>`;
+  bindQuizPicker();
+  $('#fSec').onchange = e => { qState.sectionId = e.target.value; qState.page = 1; go('questions'); };
+  $('#fStatus').onchange = e => { qState.status = e.target.value; qState.page = 1; go('questions'); };
+  $('#fSearch').onkeydown = e => { if (e.key === 'Enter') { qState.search = e.target.value.trim(); qState.page = 1; go('questions'); } };
+  $('#pPrev').onclick = () => { qState.page--; go('questions'); };
+  $('#pNext').onclick = () => { qState.page++; go('questions'); };
+  $('#add').onclick = () => questionForm({ QuizID: ctx.quizId, SectionID: qState.sectionId || (ctx.sections[0] || {}).SectionID || '', CorrectAnswer: 'A', Status: 'Active' });
+  $('#main').onclick = async e => {
+    const b = e.target.closest('[data-a]'); if (!b) return; const q = cache.questions[b.dataset.id];
+    if (b.dataset.a === 'edit') questionForm(q);
+    if (b.dataset.a === 'toggle') { await call('saveQuestion', { question: { QuestionID: q.QuestionID, Status: String(q.Status).toLowerCase() === 'inactive' ? 'Active' : 'Inactive' } }).catch(x => toast(x.message)); go('questions'); }
+  };
+};
+function questionForm(v) {
+  const secOpts = [{ v: '', l: '(no section)' }].concat(ctx.sections.map(s => ({ v: s.SectionID, l: s.SectionName })));
+  openForm({
+    title: v.QuestionID ? 'Edit question ' + v.QuestionID : 'Add question', values: v,
+    fields: [
+      { name: 'SectionID', label: 'Section', type: 'select', options: secOpts },
+      { name: 'Question', label: 'Question', type: 'textarea' },
+      { name: 'OptionA', label: 'Option A' }, { name: 'OptionB', label: 'Option B' },
+      { name: 'OptionC', label: 'Option C', hint: '(optional)' }, { name: 'OptionD', label: 'Option D', hint: '(optional)' },
+      { name: 'CorrectAnswer', label: 'Correct answer', type: 'select', options: ['A', 'B', 'C', 'D'].map(x => ({ v: x, l: x })) },
+      { name: 'Status', label: 'Status', type: 'select', options: STATUS_OPTS },
+      { name: 'TimeLimit', label: 'Time limit (seconds)', type: 'number', hint: '(blank = quiz default)' },
+      { name: 'Marks', label: 'Marks', type: 'number', hint: '(blank = quiz default)' },
+      { name: 'NegativeMarks', label: 'Negative marks', type: 'number', hint: '(blank = quiz default)' },
+      { name: 'Explanation', label: 'Explanation', type: 'textarea', hint: '(shown after the quiz)' }
+    ],
+    onSave: async data => {
+      if (v.QuestionID) data.QuestionID = v.QuestionID; else data.QuizID = v.QuizID;
+      await call('saveQuestion', { question: data }); toast('Question saved'); go('questions');
+    }
+  });
+}
+
+VIEWS.participants = async () => {
+  if (!ctx.quizzes.length) await loadQuizzes();
+  const d = ctx.quizId ? await call('adminList', { entity: 'participants', quizId: ctx.quizId }) : { Items: [] };
+  cache.participants = {}; d.Items.forEach(p => cache.participants[p.ParticipantID] = p);
+  const rows = d.Items.map(p => `<tr><td>${esc(p.Name)}</td><td>${esc(p.Mobile)}</td><td>${esc(fmtDate(p.JoinTime))}</td><td>${esc(p.Status)}</td>
+    <td class="act">${p.Status === 'Removed' ? `<button class="btn sm ghost" data-a="restore" data-id="${esc(p.ParticipantID)}">Restore</button>` : `<button class="btn sm danger" data-a="remove" data-id="${esc(p.ParticipantID)}">Remove</button>`}</td></tr>`);
+  $('#main').innerHTML = `<h1>Participants</h1><div class="bar">${quizPicker()}<span class="muted">${d.Items.length} joined</span></div>
+    <div class="note">Removing a participant frees their seat (and lets the same mobile number join again). Their result, if any, stays on the leaderboard.</div>
+    ${table(['Name', 'Mobile', 'Joined', 'Status', ''], rows)}`;
+  bindQuizPicker();
+  $('#main').onclick = async e => {
+    const b = e.target.closest('[data-a]'); if (!b) return;
+    if (b.dataset.a === 'remove' && !confirm('Remove this participant?')) return;
+    await call('saveParticipant', { participant: { ParticipantID: b.dataset.id, Status: b.dataset.a === 'remove' ? 'Removed' : 'Joined' } }).catch(x => toast(x.message)); go('participants');
+  };
+};
+
+VIEWS.results = async () => {
+  if (!ctx.quizzes.length) await loadQuizzes();
+  const d = ctx.quizId ? await call('adminList', { entity: 'results', quizId: ctx.quizId }) : { Items: [] };
+  const rows = d.Items.map(r => `<tr><td>${esc(r.Rank)}</td><td>${esc(r.Name)}</td><td><b>${esc(fmtNum(r.Score))}</b></td><td>${esc(fmtNum(r.Percentage))}%</td>
+    <td>${esc(r.Correct)} / ${esc(r.Wrong)} / ${esc(r.Skipped)}</td><td>${esc(fmtDur(r.TimeTakenSec))}</td><td>${esc(fmtDate(r.CompletedAt))}</td></tr>`);
+  $('#main').innerHTML = `<h1>Results</h1><div class="bar">${quizPicker()}<span class="grow"></span><button class="btn ghost" id="csv" type="button" ${d.Items.length ? '' : 'disabled'}>Download CSV</button></div>
+    ${table(['Rank', 'Name', 'Score', '%', 'Correct / Wrong / Skipped', 'Time taken', 'Completed'], rows)}`;
+  bindQuizPicker();
+  $('#csv').onclick = () => downloadCSV('results-' + ctx.quizId + '.csv', ['Rank', 'Name', 'Score', 'Percentage', 'Correct', 'Wrong', 'Skipped', 'TimeTakenSec', 'CompletedAt'],
+    d.Items.map(r => [r.Rank, r.Name, r.Score, r.Percentage, r.Correct, r.Wrong, r.Skipped, r.TimeTakenSec, fmtDate(r.CompletedAt)]));
+};
+
+VIEWS.settings = async () => {
+  const d = await call('adminList', { entity: 'settings' });
+  $('#main').innerHTML = `<h1>Settings</h1><div class="card"><div class="cols">
+    ${d.Items.map(s => `<div><label>${esc(s.Key)}</label><input data-k="${esc(s.Key)}" value="${esc(s.Value)}"></div>`).join('')}
+    <div><label>New admin password <small>${d.HasAdminPassword ? '(leave blank to keep the current one; minimum 8 characters)' : '(minimum 8 characters)'}</small></label><input id="newPw" type="password" autocomplete="new-password"></div>
+    </div><div id="setErr" class="err" hidden></div>
+    <p><button class="btn" id="saveSet" type="button">Save settings</button></p>
+    <p class="muted">Yes/No settings: MobileRequired, ShowLeaderboard, ShowReview. Default time, marks and negative marks apply when a quiz or question leaves them blank.</p></div>`;
+  $('#saveSet').onclick = async () => {
+    const settings = {}; document.querySelectorAll('[data-k]').forEach(i => settings[i.dataset.k] = i.value);
+    settings.AdminPassword = $('#newPw').value;
+    try { await call('saveSettings', { settings }); toast('Settings saved'); $('#newPw').value = ''; } catch (e) { $('#setErr').textContent = e.message; $('#setErr').hidden = false; }
+  };
+};
+
+/* ------------------------------ boot ------------------------------ */
+(async function () {
+  if (token) { try { await start(); return; } catch (e) {} }
+  logout();
+})();
+</script>
+</body>
+</html>
