@@ -51,6 +51,29 @@ tr:last-child td{border-bottom:0}
 td.act{white-space:nowrap;text-align:right}td.act .btn{margin-left:4px}
 .tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:600}
 .tag.on{background:var(--green-l);color:var(--green-d)}.tag.off{background:var(--red-l);color:#8e2016}
+.tag.live{background:#fff0ef;color:var(--red)}.tag.std{background:var(--page);color:var(--muted)}
+.card,.stat,.tw{box-shadow:0 1px 2px rgba(14,38,32,.04),0 8px 24px -14px rgba(14,38,32,.2)}
+.live-hero{display:flex;align-items:center;justify-content:space-between;gap:16px;background:linear-gradient(135deg,var(--green-d),var(--green));color:#fff;border-radius:16px;padding:20px 22px;margin-bottom:16px;flex-wrap:wrap}
+.live-hero .lh-left b{display:block;font:800 22px var(--display)}
+.live-hero .lh-left span{opacity:.85;font-size:14px}
+.live-hero .lh-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);padding:4px 12px;border-radius:99px;font-weight:700;font-size:13px}
+.live-hero .lh-badge i{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.live-controls{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.qprogress{display:flex;align-items:center;gap:10px;margin-bottom:14px;color:var(--muted);font-size:14px}
+.qprogress .dots{display:flex;gap:6px}
+.qprogress .dots span{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.qprogress .dots span.done{background:var(--green)}
+.qprogress .dots span.cur{background:var(--red)}
+.live-lb-row{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line)}
+.live-lb-row:last-child{border-bottom:0}
+.live-lb-row .rk{flex:none;width:26px;height:26px;border-radius:50%;background:var(--page);display:grid;place-items:center;font:700 13px var(--display)}
+.live-lb-row:nth-child(1) .rk{background:#fdf3da;color:var(--gold, #c8971f)}
+.live-lb-row .nm{flex:1;font-weight:600}
+.live-lb-row .sc{font:700 15px var(--display);color:var(--green-d)}
+.live-current-q{background:var(--green-l);border:1px solid var(--green);border-radius:12px;padding:12px 14px;margin-bottom:14px}
+.live-current-q .k{font-size:13px;color:var(--green-d);font-weight:700;text-transform:uppercase;letter-spacing:.03em}
+.live-current-q .ans{display:inline-block;margin-top:4px;background:#fff;border:1px solid var(--green);border-radius:8px;padding:2px 10px;font-weight:700;color:var(--green-d)}
 .trunc{max-width:420px;white-space:pre-line;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
 .pager{display:flex;gap:10px;align-items:center;justify-content:flex-end;margin-top:12px}
 .err{margin-top:12px;padding:10px 14px;border-radius:10px;background:var(--red-l);color:#8e2016;font-weight:500}
@@ -94,12 +117,12 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
 
 <script>
 /* Paste your Google Apps Script Web App URL between the quotes (same URL as in index.html). */
-const API_URL = "https://script.google.com/macros/s/AKfycbwooDLpYroujYm5Xh5QwtjYxzrAxEGixVuBZEbOAMpUpdk36Ngv_-dD3cH1y8LjC4lBww/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxVpJYAOF34er60Da0bOvwzVz69150Ap5DPf0Vaoe-uXvSxCe6oE-fvt3N0cpHerp2y0A/exec";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 let token = sessionStorage.getItem('adm_token') || '';
-const ctx = { quizId: '', quizzes: [], sections: [] };
+const ctx = { quizId: '', quizzes: [], sections: [], liveQuizId: '' };
 let view = 'dashboard', cache = {}, qState = { sectionId: '', search: '', status: '', page: 1 };
 
 function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(() => t.hidden = true, 2400); }
@@ -133,7 +156,7 @@ $('#loginBtn').addEventListener('click', doLogin);
 $('#pw').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 $('#logout').addEventListener('click', logout);
 
-const TABS = [['dashboard', 'Dashboard'], ['quizzes', 'Quizzes'], ['sections', 'Sections'], ['questions', 'Questions'], ['participants', 'Participants'], ['results', 'Results'], ['settings', 'Settings']];
+const TABS = [['dashboard', 'Dashboard'], ['quizzes', 'Quizzes'], ['live', 'Live Control'], ['sections', 'Sections'], ['questions', 'Questions'], ['participants', 'Participants'], ['results', 'Results'], ['settings', 'Settings']];
 async function start() {
   $('#login').hidden = true; $('#app').hidden = false;
   $('#nav').innerHTML = TABS.map(t => `<button type="button" data-v="${t[0]}">${t[1]}</button>`).join('');
@@ -150,6 +173,7 @@ async function loadSections() {
   ctx.sections = ctx.quizId ? (await call('adminList', { entity: 'sections', quizId: ctx.quizId })).Items : [];
 }
 async function go(v) {
+  if (v !== 'live') stopLiveTimer();
   view = v;
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
   $('#main').innerHTML = '<p class="muted">Loading…</p>';
@@ -215,16 +239,18 @@ VIEWS.dashboard = async () => {
 VIEWS.quizzes = async () => {
   await loadQuizzes();
   cache.quizzes = {}; ctx.quizzes.forEach(q => cache.quizzes[q.QuizID] = q);
+  const modePill = m => String(m).toLowerCase() === 'live' ? '<span class="tag live">Live</span>' : '<span class="tag std">Standard</span>';
   const rows = ctx.quizzes.map(q => `<tr>
     <td>${esc(q.QuizID)}</td><td><b>${esc(q.QuizName)}</b><div class="muted">${esc(q.Description)}</div></td>
-    <td>${esc(q.PIN)}</td><td>${tag(q.Status)}</td>
+    <td>${esc(q.PIN)}</td><td>${modePill(q.Mode)}</td><td>${tag(q.Status)}</td>
     <td>${q.ParticipantCount}${q.MaxParticipants ? ' / ' + esc(q.MaxParticipants) : ''}</td><td>${q.QuestionCount}</td>
     <td class="act"><button class="btn sm ghost" data-a="edit" data-id="${esc(q.QuizID)}">Edit</button>
       <button class="btn sm ghost" data-a="toggle" data-id="${esc(q.QuizID)}">${String(q.Status).toLowerCase() === 'active' ? 'Deactivate' : 'Activate'}</button>
       <button class="btn sm ghost" data-a="link" data-id="${esc(q.QuizID)}">Copy link</button></td></tr>`);
   $('#main').innerHTML = `<h1>Quizzes</h1><div class="bar"><button class="btn" id="add" type="button">New quiz</button></div>
-    ${table(['ID', 'Quiz', 'PIN', 'Status', 'Participants', 'Questions', ''], rows)}`;
-  $('#add').onclick = () => quizForm({ Status: 'Active' });
+    ${table(['ID', 'Quiz', 'PIN', 'Mode', 'Status', 'Participants', 'Questions', ''], rows)}
+    <div class="note">Set a quiz's <b>Mode</b> to <b>Live</b> to run it host-paced, everyone on the same question at once — control it from the <b>Live Control</b> tab.</div>`;
+  $('#add').onclick = () => quizForm({ Status: 'Active', Mode: 'Standard' });
   $('#main').onclick = async e => {
     const b = e.target.closest('[data-a]'); if (!b) return; const q = cache.quizzes[b.dataset.id];
     if (b.dataset.a === 'edit') quizForm(q);
@@ -238,13 +264,79 @@ function quizForm(v) {
     values: v,
     fields: [
       { name: 'QuizName', label: 'Quiz name' }, { name: 'PIN', label: 'Quiz PIN' },
-      { name: 'Description', label: 'Description', type: 'textarea' }, { name: 'Status', label: 'Status', type: 'select', options: STATUS_OPTS },
+      { name: 'Description', label: 'Description', type: 'textarea' },
+      { name: 'Mode', label: 'Mode', type: 'select', options: [{ v: 'Standard', l: 'Standard (self-paced)' }, { v: 'Live', l: 'Live (host-paced, real-time leaderboard)' }] },
+      { name: 'Status', label: 'Status', type: 'select', options: STATUS_OPTS },
       { name: 'MaxParticipants', label: 'Maximum participants', type: 'number', hint: '(blank = unlimited)' },
       { name: 'QuestionTime', label: 'Default question time (seconds)', type: 'number' },
       { name: 'Marks', label: 'Default marks', type: 'number' }, { name: 'NegativeMarks', label: 'Default negative marks', type: 'number' }
     ],
     onSave: async data => { if (v.QuizID) data.QuizID = v.QuizID; await call('saveQuiz', { quiz: data }); toast('Quiz saved'); go('quizzes'); }
   });
+}
+
+let liveTimer = null, liveQuizzesCache = [];
+function stopLiveTimer() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } }
+
+VIEWS.live = async () => {
+  if (!ctx.quizzes.length) await loadQuizzes();
+  liveQuizzesCache = ctx.quizzes.filter(q => String(q.Mode).toLowerCase() === 'live');
+  if (!liveQuizzesCache.length) {
+    $('#main').innerHTML = `<h1>Live Control</h1><div class="card muted">No Live-mode quizzes yet. Go to <b>Quizzes</b>, create one (or edit an existing quiz) and set <b>Mode</b> to <b>Live</b>.</div>`;
+    return;
+  }
+  if (!liveQuizzesCache.some(q => q.QuizID === ctx.liveQuizId)) ctx.liveQuizId = liveQuizzesCache[0].QuizID;
+  $('#main').innerHTML = `<h1>Live Control</h1>
+    <div class="bar"><select id="liveQuizSel" aria-label="Live quiz">${liveQuizzesCache.map(q => `<option value="${esc(q.QuizID)}" ${q.QuizID === ctx.liveQuizId ? 'selected' : ''}>${esc(q.QuizName)} (${esc(q.QuizID)})</option>`).join('')}</select></div>
+    <div id="liveBody"><p class="muted">Loading…</p></div>`;
+  $('#liveQuizSel').onchange = e => { ctx.liveQuizId = e.target.value; renderLiveBody(true); };
+  renderLiveBody(true);
+  stopLiveTimer();
+  liveTimer = setInterval(() => renderLiveBody(false), 2500);
+};
+
+async function renderLiveBody(showSpinner) {
+  const box = $('#liveBody'); if (!box) return stopLiveTimer(); // navigated away
+  let d;
+  try { d = await call('liveAdminState', { quizId: ctx.liveQuizId }); }
+  catch (e) { if (showSpinner) box.innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+  const quiz = liveQuizzesCache.find(q => q.QuizID === ctx.liveQuizId) || {};
+  const statusLabel = { Lobby: 'Waiting in lobby', Live: 'Live now', Ended: 'Ended' }[d.Status] || d.Status;
+
+  let controls = '';
+  if (d.Status === 'Lobby') controls = `<button class="btn" id="lvStart" type="button" ${d.ParticipantCount ? '' : 'disabled'}>Start quiz</button>`;
+  else if (d.Status === 'Live') controls = `<button class="btn" id="lvNext" type="button">${d.Index >= d.Total - 1 ? 'Finish quiz' : 'Next question →'}</button><button class="btn danger" id="lvEnd" type="button">End now</button>`;
+  else controls = `<button class="btn ghost" id="lvReset" type="button">Reset to lobby (same participants)</button>`;
+
+  let currentQ = '';
+  if (d.CurrentQuestion) {
+    const cq = d.CurrentQuestion;
+    currentQ = `<div class="live-current-q"><div class="k">${esc(cq.SectionName)} · Question ${d.Index + 1} of ${d.Total}</div>
+      <div style="font-weight:700;margin-top:2px">${esc(cq.Question)}</div>
+      <div style="margin-top:6px">A. ${esc(cq.OptionA)} &nbsp; B. ${esc(cq.OptionB)}${cq.OptionC ? ' &nbsp; C. ' + esc(cq.OptionC) : ''}${cq.OptionD ? ' &nbsp; D. ' + esc(cq.OptionD) : ''}</div>
+      <span class="ans">Correct: ${esc(cq.CorrectAnswer)}</span></div>`;
+  }
+
+  const dots = Array.from({ length: d.Total }, (_, i) => `<span class="${i < d.Index ? 'done' : ''}${i === d.Index && d.Status === 'Live' ? ' cur' : ''}"></span>`).join('');
+
+  const lbRows = (d.Leaderboard || []).map(it => `<div class="live-lb-row"><span class="rk">${it.Rank}</span><span class="nm">${esc(it.Name)}</span><span class="sc">${it.Score}</span></div>`).join('')
+    || '<div class="muted" style="padding:8px 0">No answers yet.</div>';
+
+  box.innerHTML = `
+    <div class="live-hero">
+      <div class="lh-left"><b>${esc(quiz.QuizName || ctx.liveQuizId)}</b><span>PIN ${esc(quiz.PIN || '')} · ${d.ParticipantCount} joined</span></div>
+      <div class="lh-badge"><i></i>${esc(statusLabel)}</div>
+    </div>
+    <div class="live-controls">${controls}</div>
+    ${d.Total ? `<div class="qprogress"><span>Question ${Math.max(d.Index, 0) + (d.Status === 'Lobby' ? 0 : 1)} / ${d.Total}</span><div class="dots">${dots}</div></div>` : ''}
+    ${currentQ}
+    <div class="card"><div style="font-weight:700;margin-bottom:8px">Live leaderboard</div>${lbRows}</div>
+    <div class="note">Share the quiz PIN (or the participant link, from Quizzes → Copy link) with everyone first, then click <b>Start quiz</b> once they've joined the lobby. Ending or finishing the quiz finalizes everyone's result automatically.</div>`;
+
+  $('#lvStart') && ($('#lvStart').onclick = async () => { await call('liveStart', { quizId: ctx.liveQuizId }).catch(x => toast(x.message)); renderLiveBody(true); });
+  $('#lvNext') && ($('#lvNext').onclick = async () => { await call('liveNext', { quizId: ctx.liveQuizId }).catch(x => toast(x.message)); renderLiveBody(true); });
+  $('#lvEnd') && ($('#lvEnd').onclick = async () => { if (confirm('End the quiz now for everyone?')) { await call('liveEnd', { quizId: ctx.liveQuizId }).catch(x => toast(x.message)); renderLiveBody(true); } });
+  $('#lvReset') && ($('#lvReset').onclick = async () => { if (confirm('Return this quiz to the lobby? The same participants can play again from question 1.')) { await call('liveReset', { quizId: ctx.liveQuizId }).catch(x => toast(x.message)); renderLiveBody(true); } });
 }
 
 VIEWS.sections = async () => {
