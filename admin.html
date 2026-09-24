@@ -117,7 +117,7 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
 
 <script>
 /* Paste your Google Apps Script Web App URL between the quotes (same URL as in index.html). */
-const API_URL = "https://script.google.com/macros/s/AKfycbxVpJYAOF34er60Da0bOvwzVz69150Ap5DPf0Vaoe-uXvSxCe6oE-fvt3N0cpHerp2y0A/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbywtVc7J65vS2lz5eJs0koiNML5pFjg2OSTLAuabCBk/dev";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -275,8 +275,8 @@ function quizForm(v) {
   });
 }
 
-let liveTimer = null, liveQuizzesCache = [];
-function stopLiveTimer() { if (liveTimer) { clearInterval(liveTimer); liveTimer = null; } }
+let liveTimer = null, liveTimerInFlight = false, liveQuizzesCache = [];
+function stopLiveTimer() { if (liveTimer) { clearTimeout(liveTimer); liveTimer = null; } }
 
 VIEWS.live = async () => {
   if (!ctx.quizzes.length) await loadQuizzes();
@@ -290,16 +290,23 @@ VIEWS.live = async () => {
     <div class="bar"><select id="liveQuizSel" aria-label="Live quiz">${liveQuizzesCache.map(q => `<option value="${esc(q.QuizID)}" ${q.QuizID === ctx.liveQuizId ? 'selected' : ''}>${esc(q.QuizName)} (${esc(q.QuizID)})</option>`).join('')}</select></div>
     <div id="liveBody"><p class="muted">Loading…</p></div>`;
   $('#liveQuizSel').onchange = e => { ctx.liveQuizId = e.target.value; renderLiveBody(true); };
-  renderLiveBody(true);
   stopLiveTimer();
-  liveTimer = setInterval(() => renderLiveBody(false), 2500);
+  renderLiveBody(true);
 };
 
+// Self-rescheduling (not setInterval): the next refresh is only scheduled
+// once the current one finishes, so a slow response never causes overlapping
+// requests to pile up on the server.
 async function renderLiveBody(showSpinner) {
   const box = $('#liveBody'); if (!box) return stopLiveTimer(); // navigated away
-  let d;
+  if (liveTimerInFlight) return;
+  liveTimerInFlight = true;
+  let d = null, failed = false;
   try { d = await call('liveAdminState', { quizId: ctx.liveQuizId }); }
-  catch (e) { if (showSpinner) box.innerHTML = `<div class="err">${esc(e.message)}</div>`; return; }
+  catch (e) { failed = true; if (showSpinner) box.innerHTML = `<div class="err">${esc(e.message)}</div>`; }
+  liveTimerInFlight = false;
+  if (!$('#liveBody')) return; // navigated away while awaiting
+  if (failed) { stopLiveTimer(); liveTimer = setTimeout(() => renderLiveBody(false), 4000); return; }
   const quiz = liveQuizzesCache.find(q => q.QuizID === ctx.liveQuizId) || {};
   const statusLabel = { Lobby: 'Waiting in lobby', Live: 'Live now', Ended: 'Ended' }[d.Status] || d.Status;
 
@@ -337,6 +344,9 @@ async function renderLiveBody(showSpinner) {
   $('#lvNext') && ($('#lvNext').onclick = async () => { await call('liveNext', { quizId: ctx.liveQuizId }).catch(x => toast(x.message)); renderLiveBody(true); });
   $('#lvEnd') && ($('#lvEnd').onclick = async () => { if (confirm('End the quiz now for everyone?')) { await call('liveEnd', { quizId: ctx.liveQuizId }).catch(x => toast(x.message)); renderLiveBody(true); } });
   $('#lvReset') && ($('#lvReset').onclick = async () => { if (confirm('Return this quiz to the lobby? The same participants can play again from question 1.')) { await call('liveReset', { quizId: ctx.liveQuizId }).catch(x => toast(x.message)); renderLiveBody(true); } });
+
+  stopLiveTimer();
+  liveTimer = setTimeout(() => renderLiveBody(false), 3000 + Math.random() * 500);
 }
 
 VIEWS.sections = async () => {
