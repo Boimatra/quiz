@@ -128,6 +128,7 @@ input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px var(--gr
 .waitmsg{margin-top:12px;padding:12px 14px;border-radius:12px;background:var(--green-l);color:var(--green-d);font-weight:600;display:flex;align-items:center;gap:10px}
 .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));z-index:5;box-shadow:0 -4px 16px rgba(0,0,0,.05)}
 .bar .in{max-width:720px;margin:0 auto;display:grid;grid-template-columns:1fr 1.2fr 1fr 1.1fr;gap:8px}
+.bar .in.no-submit{grid-template-columns:1fr 1.4fr 1fr}
 .bar .btn{min-height:48px;padding:0 4px;font-size:15px;line-height:1.1}
 
 /* live in-quiz leaderboard panel */
@@ -135,6 +136,7 @@ input:focus{border-color:var(--green);outline:none;box-shadow:0 0 0 3px var(--gr
 .livepanel .hd{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .livepanel .hd b{font:700 15px var(--display)}
 .count-pill{margin-left:auto;font-size:13px;color:var(--muted);background:var(--page);padding:2px 10px;border-radius:99px}
+.conn-banner{display:flex;align-items:center;gap:8px;background:var(--gold-l);color:#8a6a10;font-size:14px;font-weight:600;padding:8px 12px;border-radius:10px;margin-bottom:10px}
 
 /* lobby */
 .lobby-wrap{text-align:center;padding:26px 12px}
@@ -259,6 +261,7 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
         <span id="tText">0:00</span>
       </div>
     </div>
+    <div id="connBanner" class="conn-banner" hidden><span class="spin" style="width:14px;height:14px;border-width:2px"></span><span data-i18n="reconnecting"></span></div>
     <div class="prog" id="progBar"><div id="progFill"></div></div>
     <div class="qcount"><span id="qCount"></span><span id="qAnswered"></span></div>
     <article class="card q">
@@ -347,7 +350,7 @@ dialog::backdrop{background:rgba(14,38,32,.55)}
    SETTINGS: paste your Google Apps Script Web App URL between the quotes.
    It looks like  https://script.google.com/macros/s/AKfy.../exec
    =================================================================== */
-const API_URL = "https://script.google.com/macros/s/AKfycbxVpJYAOF34er60Da0bOvwzVz69150Ap5DPf0Vaoe-uXvSxCe6oE-fvt3N0cpHerp2y0A/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbywtVc7J65vS2lz5eJs0koiNML5pFjg2OSTLAuabCBk/dev";
 
 const LS_STATE = 'quiz_state_v1', LS_RESULT = 'quiz_result_v1', LS_LANG = 'quiz_lang', LS_NAME = 'quiz_name';
 const MAX_AGE_MS = 12 * 3600 * 1000;
@@ -372,7 +375,7 @@ const I18N = {
     lbInfo:'{n} participants finished. Highest score first; ties go to the faster finisher.',
     leaveWarn:'Your quiz is still running.', of:'of',
     liveTag:'LIVE', lobbyWait:'Waiting for the host to start the quiz…', liveLb:'Live leaderboard',
-    waitHost:'Answer locked — waiting for the next question…', waitEnd:'Finishing up…',
+    waitHost:'Answer locked — waiting for the next question…', waitEnd:'Finishing up…', reconnecting:'Reconnecting…',
     e_NETWORK:'Could not reach the server. Check your internet connection and try again.',
     e_NAME_REQUIRED:'Please enter your name', e_PIN_REQUIRED:'Please enter the Quiz PIN', e_PIN_INVALID:'Invalid Quiz PIN',
     e_QUIZ_NOT_FOUND:'Quiz not found', e_QUIZ_INACTIVE:'Quiz is inactive', e_LIMIT:'Participant limit reached',
@@ -398,7 +401,7 @@ const I18N = {
     lbInfo:'{n} জন শেষ করেছেন। বেশি স্কোর আগে; স্কোর সমান হলে যিনি দ্রুত শেষ করেছেন তিনি এগিয়ে।',
     leaveWarn:'আপনার কুইজ এখনো চলছে।', of:'এর মধ্যে',
     liveTag:'লাইভ', lobbyWait:'হোস্ট কুইজ শুরু করার জন্য অপেক্ষা করছে…', liveLb:'লাইভ লিডারবোর্ড',
-    waitHost:'উত্তর লক হয়েছে — পরের প্রশ্নের জন্য অপেক্ষা করুন…', waitEnd:'শেষ করা হচ্ছে…',
+    waitHost:'উত্তর লক হয়েছে — পরের প্রশ্নের জন্য অপেক্ষা করুন…', waitEnd:'শেষ করা হচ্ছে…', reconnecting:'সংযোগ করা হচ্ছে…',
     e_NETWORK:'সার্ভারের সাথে সংযোগ হয়নি। ইন্টারনেট দেখে আবার চেষ্টা করুন।',
     e_NAME_REQUIRED:'অনুগ্রহ করে আপনার নাম লিখুন', e_PIN_REQUIRED:'অনুগ্রহ করে কুইজ পিন লিখুন', e_PIN_INVALID:'কুইজ পিন সঠিক নয়',
     e_QUIZ_NOT_FOUND:'কুইজ পাওয়া যায়নি', e_QUIZ_INACTIVE:'কুইজটি এখন চালু নেই', e_LIMIT:'অংশগ্রহণকারীর সীমা পূর্ণ হয়ে গেছে',
@@ -496,7 +499,7 @@ const home = { quizzes: [], selected: '', mobileRequired: false, showLb: true };
 let S = null;            // running quiz session
 let lastResult = null;
 let lbQuizId = '';
-let homeLbTimer = null, homeLbPrevRanks = null;
+let homeLbPrevRanks = null;
 
 function renderQuizBox() {
   const box = $('quizBox'); box.textContent = '';
@@ -519,7 +522,7 @@ function renderQuizBox() {
       if (q.Mode === 'Live') { const lb = el('span', 'live-badge'); lb.appendChild(el('i')); lb.appendChild(el('span', '', t('liveTag'))); top.appendChild(lb); }
       b.appendChild(top);
       if (q.Description) b.appendChild(el('span', 'd', q.Description));
-      b.addEventListener('click', () => { home.selected = q.QuizID; renderQuizBox(); refreshHomeLb(); });
+      b.addEventListener('click', () => { home.selected = q.QuizID; renderQuizBox(); refreshHomeLb(true); });
       wrap.appendChild(b);
     });
     box.appendChild(wrap);
@@ -530,32 +533,41 @@ function renderQuizBox() {
 // A compact leaderboard preview on the home page itself, per the requirement
 // that the leaderboard be visible on the front page (live quizzes show live,
 // in-progress scores; self-paced quizzes show completed participants so far).
-function stopHomeLb() { if (homeLbTimer) { clearInterval(homeLbTimer); homeLbTimer = null; } }
-async function refreshHomeLb(first) {
+// Self-rescheduling (not setInterval) for the same reason as the live-quiz
+// poll: never let a slow response cause requests to pile up.
+let homeLbTimer = null, homeLbInFlight = false, homeLbQuizId = '';
+function stopHomeLb() { if (homeLbTimer) { clearTimeout(homeLbTimer); homeLbTimer = null; } }
+function refreshHomeLb(first) {
   stopHomeLb();
   if (!home.selected || !home.showLb) { $('homeLbCard').hidden = true; return; }
-  const quiz = home.quizzes.find(q => q.QuizID === home.selected);
+  if (first) { homeLbPrevRanks = null; homeLbQuizId = home.selected; }
+  homeLbTick();
+}
+async function homeLbTick() {
+  if (homeLbInFlight) return;
+  if ($('s-home').classList.contains('on') === false || home.selected !== homeLbQuizId) return; // navigated away / selection changed
+  const quiz = home.quizzes.find(q => q.QuizID === homeLbQuizId);
   if (!quiz) { $('homeLbCard').hidden = true; return; }
-  if (first) homeLbPrevRanks = null;
-  const tick = async () => {
-    if ($('s-home').classList.contains('on') === false) return stopHomeLb();
-    try {
-      let items, count;
-      if (quiz.Mode === 'Live') {
-        const d = await api('liveState', { quizId: quiz.QuizID });
-        items = d.Leaderboard; count = d.ParticipantCount;
-      } else {
-        const d = await api('results', { quizId: quiz.QuizID });
-        items = d.Items.slice(0, 5); count = d.TotalCompleted;
-      }
-      $('homeLbCard').hidden = false;
-      $('homeLbCount').textContent = count;
-      renderLbList($('homeLbBody'), items, null, homeLbPrevRanks);
-      homeLbPrevRanks = ranksByName(items);
-    } catch (e) { /* leaderboard preview is best-effort; stay quiet on failure */ }
-  };
-  await tick();
-  homeLbTimer = setInterval(tick, quiz.Mode === 'Live' ? 3000 : 8000);
+  homeLbInFlight = true;
+  let ok = true, items = [], count = 0;
+  try {
+    if (quiz.Mode === 'Live') {
+      const d = await api('liveState', { quizId: quiz.QuizID });
+      items = d.Leaderboard; count = d.ParticipantCount;
+    } else {
+      const d = await api('results', { quizId: quiz.QuizID });
+      items = d.Items.slice(0, 5); count = d.TotalCompleted;
+    }
+  } catch (e) { ok = false; }
+  homeLbInFlight = false;
+  if ($('s-home').classList.contains('on') === false || home.selected !== homeLbQuizId) return;
+  if (ok) {
+    $('homeLbCard').hidden = false;
+    $('homeLbCount').textContent = count;
+    renderLbList($('homeLbBody'), items, null, homeLbPrevRanks);
+    homeLbPrevRanks = ranksByName(items);
+  }
+  homeLbTimer = setTimeout(homeLbTick, jitter(quiz.Mode === 'Live' ? 4000 : 9000));
 }
 
 function loadSaved() { try { const s = JSON.parse(localStorage.getItem(LS_STATE)); if (s && !s.submitted && Date.now() - s.savedAt < MAX_AGE_MS && s.questions) return s; } catch (e) {} return null; }
@@ -717,14 +729,24 @@ function renderQuestion(keepTimer) {
   $('marksInfo').textContent = t('marksInfo', { m: fmtNum(q.Marks), n: fmtNum(negative) });
   $('prevBtn').disabled = S.idx === 0;
   $('nextBtn').disabled = S.idx === n - 1;
+  const isLast = S.idx === n - 1;
+  $('submitBtn').hidden = !isLast;
+  $('quizBar').querySelector('.in').classList.toggle('no-submit', !isLast);
   if (!keepTimer) { startTimer(); } else { paintTimer(S.timeLeft[q.QuestionID], q.TimeLimit); }
 }
 
+let liveAnswerDebounce = null;
 function choose(L) {
   const q = cur(); if (isLocked(q)) return;
   S.answers[q.QuestionID] = L;
   saveState(); renderQuestion(true);
-  if (S.mode === 'Live') api('submitAnswer', { quizId: S.quiz.QuizID, participantId: S.pid, token: S.token, questionId: q.QuestionID, selectedAnswer: L }, 'POST').catch(() => {});
+  if (S.mode === 'Live') {
+    clearTimeout(liveAnswerDebounce);
+    const qid = q.QuestionID, quizId = S.quiz.QuizID, pid = S.pid, token = S.token;
+    liveAnswerDebounce = setTimeout(() => {
+      api('submitAnswer', { quizId, participantId: pid, token, questionId: qid, selectedAnswer: L }, 'POST').catch(() => {});
+    }, 300);
+  }
 }
 $('clearBtn').addEventListener('click', () => { const q = cur(); if (isLocked(q)) return; delete S.answers[q.QuestionID]; saveState(); renderQuestion(true); });
 
@@ -757,6 +779,7 @@ $('palDlg').addEventListener('close', () => { if (S && S.mode !== 'Live' && $('s
 
 /* submit */
 function openConfirm(timeUpOnLast) {
+  if (!S || S.mode === 'Live') return; // live quizzes are finalized by the host, never by this dialog
   freezeTimer(); saveState();
   const a = answeredCount(), n = S.questions.length;
   $('confirmText').textContent = (timeUpOnLast ? t('lastTimeUp') + ' ' : '') + t('submitBody', { a, n, u: n - a });
@@ -797,27 +820,54 @@ document.addEventListener('keydown', e => {
 /* ------------------------------ LIVE QUIZ ------------------------------ */
 // Host-paced flow: the admin's Live Control screen drives S.idx for every
 // participant at once. We poll apiLiveState (one call = sync + countdown +
-// leaderboard) every LIVE_POLL_MS, and run a light 250ms local ticker between
-// polls purely so the on-screen clock counts down smoothly.
-let livePollHandle = null, liveTickHandle = null, liveState = { status: 'Lobby', index: -1, timeLeft: 0, timeLimit: 0 };
+// leaderboard) roughly every LIVE_POLL_MS.
+//
+// IMPORTANT: this is a self-RESCHEDULING loop (setTimeout), not setInterval.
+// setInterval fires on a fixed clock regardless of whether the previous
+// request has finished — on a slow connection (or a slow Apps Script
+// response) that means a second, third, fourth request can pile up on top
+// of the first, which makes the server look "stuck" for everyone even with
+// just a couple of participants. Here, the NEXT poll is only scheduled once
+// the current one finishes, and a failure backs off (with jitter) instead of
+// retrying immediately — so a rough patch slows down gracefully rather than
+// making things worse.
+let liveTickHandle = null, livePollTimer = null, livePollInFlight = false, liveFailStreak = 0;
 let livePrevRanks = null, liveLocked = false;
 
-function stopLivePoll() { if (livePollHandle) { clearInterval(livePollHandle); livePollHandle = null; } stopLiveTick(); }
+function stopLivePoll() { if (livePollTimer) { clearTimeout(livePollTimer); livePollTimer = null; } stopLiveTick(); }
 function stopLiveTick() { if (liveTickHandle) { clearInterval(liveTickHandle); liveTickHandle = null; } }
+function scheduleLivePoll(delay) { if (livePollTimer) clearTimeout(livePollTimer); livePollTimer = setTimeout(pollLiveOnce, delay); }
+function jitter(base) { return base + Math.random() * 400; }
+function showConnBanner(on) { const b = document.getElementById('connBanner'); if (b) b.hidden = !on; }
 
 function enterLiveFlow() {
-  livePrevRanks = null;
+  livePrevRanks = null; liveFailStreak = 0;
   pollLiveOnce();
-  livePollHandle = setInterval(pollLiveOnce, LIVE_POLL_MS);
 }
 
 async function pollLiveOnce() {
-  if (!S) return stopLivePoll();
-  let d;
-  try { d = await api('liveState', { quizId: S.quiz.QuizID, participantId: S.pid }); }
-  catch (e) { return; /* transient network hiccup — next poll will retry */ }
-  liveState = { status: d.Status, index: d.Index, timeLeft: d.TimeLeft, timeLimit: d.TimeLimit };
+  if (!S || livePollInFlight) return;
+  livePollInFlight = true;
+  let d = null, failed = false;
+  try {
+    d = await api('liveState', { quizId: S.quiz.QuizID, participantId: S.pid });
+  } catch (e) { failed = true; }
+  livePollInFlight = false;
+  if (!S) return; // the session ended (submitted / left) while this request was in flight
 
+  if (failed) {
+    liveFailStreak++;
+    if (liveFailStreak >= 2) showConnBanner(true); // a single blip stays invisible; repeated ones don't
+    scheduleLivePoll(jitter(Math.min(8000, LIVE_POLL_MS * Math.pow(1.7, Math.min(liveFailStreak, 4)))));
+    return;
+  }
+  liveFailStreak = 0;
+  showConnBanner(false);
+  handleLiveState(d);
+  if (d.Status !== 'Ended') scheduleLivePoll(jitter(LIVE_POLL_MS));
+}
+
+function handleLiveState(d) {
   if (d.Status === 'Lobby') {
     show('lobby');
     $('lobbyQuizName').textContent = S.quiz.QuizName;
@@ -827,15 +877,7 @@ async function pollLiveOnce() {
 
   if (d.Status === 'Ended') {
     stopLivePoll();
-    busy(true, 'starting');
-    try {
-      const r = await api('submitQuiz', { quizId: S.quiz.QuizID, participantId: S.pid, token: S.token, answers: [] }, 'POST');
-      localStorage.removeItem(LS_STATE);
-      r._savedAt = Date.now();
-      localStorage.setItem(LS_RESULT, JSON.stringify(r));
-      S = null; busy(false);
-      showResult(r);
-    } catch (e) { busy(false); toast(errText(e)); }
+    finishLiveQuiz();
     return;
   }
 
@@ -860,6 +902,24 @@ async function pollLiveOnce() {
   renderLbList($('liveLbBody'), d.Leaderboard, d.Me ? d.Me.Rank : null, livePrevRanks);
   livePrevRanks = ranksByName(d.Leaderboard);
   saveState();
+}
+
+async function finishLiveQuiz() {
+  busy(true, 'starting');
+  try {
+    const r = await api('submitQuiz', { quizId: S.quiz.QuizID, participantId: S.pid, token: S.token, answers: [] }, 'POST');
+    localStorage.removeItem(LS_STATE);
+    r._savedAt = Date.now();
+    localStorage.setItem(LS_RESULT, JSON.stringify(r));
+    S = null; busy(false);
+    showResult(r);
+  } catch (e) {
+    busy(false);
+    // Don't strand the participant on a blank screen — retry finishing the
+    // quiz rather than giving up, since the quiz has genuinely ended server-side.
+    toast(errText(e));
+    setTimeout(finishLiveQuiz, 2000);
+  }
 }
 
 function startLiveTick(timeLeft, timeLimit) {
